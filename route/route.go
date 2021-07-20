@@ -34,6 +34,8 @@ func Route() *gin.Engine {
 	/*
 		curl -X PUT http://192.168.23.1:8080/upload \-F "file=@/opt/test.txt" \-H "Content-Type: multipart/form-data"
 	*/
+	// 为 multipart forms 设置较低的内存限制 (默认是 32 MiB)
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	r.PUT("upload", func(context *gin.Context) {
 		file, _ := context.FormFile("file")
 		log.Println(file.Filename)
