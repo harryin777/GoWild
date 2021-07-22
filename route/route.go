@@ -43,5 +43,20 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
+	//上传多文件到服务器
+	/**
+	curl -X PUT http://192.168.23.1:8080/multiUpload \-F "upload[]=@/opt/test.txt" \-F "upload[]=@/opt/test2.txt" \-H "Content-Type: multipart/form-data"
+	*/
+	r.PUT("/multiUpload", func(context *gin.Context) {
+		form, _ := context.MultipartForm()
+		for _, file := range form.File["upload[]"] {
+			log.Println(file.Filename)
+			context.SaveUploadedFile(file, "./"+file.Filename)
+		}
+		context.JSON(http.StatusOK, "ok")
+	})
+
+	//从 reader 读取数据
+
 	return r
 }
