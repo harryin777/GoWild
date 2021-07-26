@@ -14,7 +14,15 @@ import (
 )
 
 func Route() *gin.Engine {
+	// 禁止日志的颜色，当用gin.New的时候，下面的语句不管用
+	gin.DisableConsoleColor()
+
 	r := gin.New()
+
+	//自定义路由的格式
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
+	}
 
 	r.GET("/someJson", func(context *gin.Context) {
 		data := map[string]interface{}{
@@ -65,7 +73,7 @@ func Route() *gin.Engine {
 	}
 	var p1 Person
 	r.GET("/shouldBindQuery", func(context *gin.Context) {
-		//TODO 绑定不上去
+		// TODO 绑定不上去
 		if context.ShouldBindQuery(&p1) == nil {
 			log.Println("==== shouldBindQuery ====")
 			log.Println(p1.Name)
@@ -97,5 +105,6 @@ func Route() *gin.Engine {
 		log.Printf("sync after 5 sec %v", context.Request.URL.Path)
 		context.JSON(http.StatusOK, "ok")
 	})
+
 	return r
 }
