@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"time"
 )
 
 func Route() *gin.Engine {
@@ -56,7 +57,45 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
-	//从 reader 读取数据
+	//shouldBindQuery 和 bindQuery
 
+	type Person struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}
+	var p1 Person
+	r.GET("/shouldBindQuery", func(context *gin.Context) {
+		//TODO 绑定不上去
+		if context.ShouldBindQuery(&p1) == nil {
+			log.Println("==== shouldBindQuery ====")
+			log.Println(p1.Name)
+			log.Println(p1.Age)
+		}
+		context.JSON(http.StatusOK, "ok")
+	})
+
+	r.GET("/bindQuery", func(context *gin.Context) {
+		if context.BindQuery(&p1) == nil {
+			log.Println("bind query")
+		}
+		context.JSON(http.StatusOK, "ok")
+	})
+
+	// 在中间件中使用 Goroutine
+	// 当在中间件或 handler 中启动新的 Goroutine 时，不能使用原始的上下文
+	r.GET("/long_async", func(context *gin.Context) {
+		cCp := context.Copy()
+		go func() {
+			time.Sleep(5 * time.Second)
+			log.Printf("async after 5 sec %v", cCp.Request.URL.Path)
+		}()
+		context.JSON(http.StatusOK, "ok")
+	})
+
+	r.GET("/long_sync", func(context *gin.Context) {
+		time.Sleep(5 * time.Second)
+		log.Printf("sync after 5 sec %v", context.Request.URL.Path)
+		context.JSON(http.StatusOK, "ok")
+	})
 	return r
 }
