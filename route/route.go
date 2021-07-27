@@ -7,6 +7,7 @@
 package route
 
 import (
+	"GoWild/base"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ func Route() *gin.Engine {
 	gin.DisableConsoleColor()
 
 	r := gin.New()
-
+	r.Use(base.CORS)
 	//自定义路由的格式
 	//gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
 	//	log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
@@ -72,7 +73,7 @@ func Route() *gin.Engine {
 		Age  int    `json:"age" binding:"required"`
 	}
 	var p1 Person
-	r.GET("/shouldBindQuery", func(context *gin.Context) {
+	r.POST("/shouldBindQuery", func(context *gin.Context) {
 		// TODO 绑定不上去
 		err := context.ShouldBindQuery(&p1)
 		if err == nil {
@@ -85,7 +86,7 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
-	r.GET("/bindQuery", func(context *gin.Context) {
+	r.POST("/bindQuery", func(context *gin.Context) {
 		if context.BindQuery(&p1) == nil {
 			log.Println("bind query")
 		}
