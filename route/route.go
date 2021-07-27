@@ -20,9 +20,9 @@ func Route() *gin.Engine {
 	r := gin.New()
 
 	//自定义路由的格式
-	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
-		log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
-	}
+	//gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+	//	log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
+	//}
 
 	r.GET("/someJson", func(context *gin.Context) {
 		data := map[string]interface{}{
@@ -66,18 +66,21 @@ func Route() *gin.Engine {
 	})
 
 	//shouldBindQuery 和 bindQuery
-
+	//注意 binding
 	type Person struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
+		Name string `json:"name" binding:"required"`
+		Age  int    `json:"age" binding:"required"`
 	}
 	var p1 Person
 	r.GET("/shouldBindQuery", func(context *gin.Context) {
 		// TODO 绑定不上去
-		if context.ShouldBindQuery(&p1) == nil {
+		err := context.ShouldBindQuery(&p1)
+		if err == nil {
 			log.Println("==== shouldBindQuery ====")
 			log.Println(p1.Name)
 			log.Println(p1.Age)
+		} else {
+			log.Println(err)
 		}
 		context.JSON(http.StatusOK, "ok")
 	})
