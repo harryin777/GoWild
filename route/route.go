@@ -69,8 +69,8 @@ func Route() *gin.Engine {
 	//shouldBindQuery 和 bindQuery
 	//注意 binding
 	type Person struct {
-		Name string `json:"name" binding:"required"`
-		Age  int    `json:"age" binding:"required"`
+		Name string `json:"name" form:"name"`
+		Age  int    `json:"age" form:"age"`
 	}
 	var p1 Person
 	r.POST("/shouldBindQuery", func(context *gin.Context) {
