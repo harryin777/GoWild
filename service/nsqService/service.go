@@ -28,7 +28,3 @@ func ProducerMsg(msg string) {
 	//生产者停止运行
 	mp.Stop()
 }
-
-func ConsumeMsg(channel string) {
-
-}
