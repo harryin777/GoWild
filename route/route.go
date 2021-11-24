@@ -8,6 +8,7 @@ package route
 
 import (
 	"GoWild/base"
+	"GoWild/route/nsq"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -25,7 +26,7 @@ func Route() *gin.Engine {
 	//	log.Printf("endpoint %v %v %v %v\n", httpMethod, absolutePath, handlerName, nuHandlers)
 	//}
 
-	r.GET("/someJson", func(context *gin.Context) {
+	r.GET("someJson", func(context *gin.Context) {
 		data := map[string]interface{}{
 			"lang": "GO",
 			"tag":  "<br>",
@@ -33,7 +34,7 @@ func Route() *gin.Engine {
 		context.AsciiJSON(http.StatusOK, data)
 	})
 
-	r.GET("/jsonP", func(context *gin.Context) {
+	r.GET("jsonP", func(context *gin.Context) {
 		data := map[string]interface{}{
 			"data": 123,
 		}
@@ -57,7 +58,7 @@ func Route() *gin.Engine {
 	/**
 	curl -X PUT http://192.168.23.1:8080/multiUpload \-F "upload[]=@/opt/test.txt" \-F "upload[]=@/opt/test2.txt" \-H "Content-Type: multipart/form-data"
 	*/
-	r.PUT("/multiUpload", func(context *gin.Context) {
+	r.PUT("multiUpload", func(context *gin.Context) {
 		form, _ := context.MultipartForm()
 		for _, file := range form.File["upload[]"] {
 			log.Println(file.Filename)
@@ -73,7 +74,7 @@ func Route() *gin.Engine {
 		Age  int    `json:"age" form:"age"`
 	}
 	var p1 Person
-	r.POST("/shouldBindQuery", func(context *gin.Context) {
+	r.POST("shouldBindQuery", func(context *gin.Context) {
 		// TODO 绑定不上去
 		err := context.ShouldBindQuery(&p1)
 		if err == nil {
@@ -86,7 +87,7 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
-	r.POST("/bindQuery", func(context *gin.Context) {
+	r.POST("bindQuery", func(context *gin.Context) {
 		if context.BindQuery(&p1) == nil {
 			log.Println("bind query")
 		}
@@ -95,7 +96,7 @@ func Route() *gin.Engine {
 
 	// 在中间件中使用 Goroutine
 	// 当在中间件或 handler 中启动新的 Goroutine 时，不能使用原始的上下文
-	r.GET("/long_async", func(context *gin.Context) {
+	r.GET("long_async", func(context *gin.Context) {
 		cCp := context.Copy()
 		go func() {
 			time.Sleep(5 * time.Second)
@@ -104,11 +105,14 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
-	r.GET("/long_sync", func(context *gin.Context) {
+	r.GET("long_sync", func(context *gin.Context) {
 		time.Sleep(5 * time.Second)
 		log.Printf("sync after 5 sec %v", context.Request.URL.Path)
 		context.JSON(http.StatusOK, "ok")
 	})
+
+	//注册 nsq
+	nsq.Route(r)
 
 	return r
 }
