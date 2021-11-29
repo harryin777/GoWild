@@ -1,9 +1,10 @@
-package consumer
+package nsq
 
 import (
 	"fmt"
 	"github.com/nsqio/go-nsq"
 	"log"
+	"time"
 )
 
 func init() {
@@ -12,12 +13,14 @@ func init() {
 
 func MsgConsumer() {
 	config := nsq.NewConfig()
+	//设置断开重连时间
+	config.LookupdPollTimeout = time.Second
+
 	c, err := nsq.NewConsumer("test", "test_Chan", config)
 	if err != nil {
 		log.Default().Println("创建消费者失败...")
 		panic(err)
 	}
-
 	c.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
 		fmt.Printf("消费!!!!%v \n", message.Body)
 		return nil

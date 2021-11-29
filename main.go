@@ -14,5 +14,6 @@ import (
 func main() {
 	r := route.Route()
 	go ip.LocationInstances().ReadLocal()
+
 	r.Run(":8080")
 }
