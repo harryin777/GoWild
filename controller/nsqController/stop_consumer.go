@@ -1,7 +1,10 @@
 package nsqController
 
-import "github.com/gin-gonic/gin"
+import (
+	"GoWild/service/nsqService"
+	"github.com/gin-gonic/gin"
+)
 
 func StopConsumer(c *gin.Context) {
-
+	nsqService.StopConsumer()
 }

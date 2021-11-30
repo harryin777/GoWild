@@ -28,7 +28,6 @@ func Test_MsgProduce(t *testing.T) {
 func Test_Hello(t *testing.T) {
 	w := httptest.NewRecorder()
 	values := url.Values{}
-	values.Add("msg", "first msg hello")
 
 	queryString := values.Encode()
 	queryString, _ = url.QueryUnescape(queryString)
