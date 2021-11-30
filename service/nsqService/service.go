@@ -1,7 +1,8 @@
 package nsqService
 
 import (
-	"GoWild/producer/nsq"
+	"GoWild/consumer/nsqConsumer"
+	"GoWild/producer/nsqProducer"
 )
 
 /**
@@ -10,8 +11,17 @@ import (
  * @return
  **/
 func ProducerMsg(msg string) {
-	err := nsq.NsqProduce(msg)
+	err := nsqProducer.NsqProduce(msg)
 	if err != nil {
 		panic(err)
 	}
+}
+
+/**
+ * @Description 停止消费
+ * @Param
+ * @return
+ **/
+func StopConsumer() {
+	nsqConsumer.NsqConsumer.StopChan <- 1
 }

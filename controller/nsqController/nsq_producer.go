@@ -1,4 +1,4 @@
-package nsq
+package nsqController
 
 import (
 	"GoWild/service/nsqService"

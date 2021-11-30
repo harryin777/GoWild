@@ -1,4 +1,4 @@
-package nsq
+package nsqProducer
 
 import (
 	"encoding/json"

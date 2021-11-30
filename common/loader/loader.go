@@ -2,22 +2,16 @@ package loader
 
 import (
 	"GoWild/data/app"
-	"GoWild/utils"
-	"encoding/json"
 	"fmt"
 	"github.com/msbranco/goconfig"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
 )
 
 const (
-	RunModeEnv    = "RUN_MODE"
-	RunEnv        = "RUN_ENV"
-	ConfPathEnv   = "SERVER_CONF_PATH"
-	ServerChannel = "SERVER_CHANNEL"
+	RunModeEnv  = "RUN_MODE"
+	ConfPathEnv = "SERVER_CONF_PATH"
 )
 
 const (
@@ -26,15 +20,9 @@ const (
 	TestMode    = "test"
 )
 
-const (
-	AWSProductEnv = "aws_product_env"
-	AWSDevelopEnv = "aws_develop_env"
-)
-
 var (
 	configPath       string
 	runMode          string
-	channel          string
 	configFile       *goconfig.ConfigFile
 	appConfigMap     map[string]*goconfig.ConfigFile
 	nacosConfig      *app.NacosConfig
@@ -59,8 +47,6 @@ func init() {
 		runMode = TestMode
 	}
 
-	channel = utils.ConvertChannelId(os.Getenv(ServerChannel))
-
 	var workPath string
 	workPath = os.Getenv(ConfPathEnv)
 	if len(workPath) == 0 {
@@ -70,42 +56,8 @@ func init() {
 		}
 	}
 
-	configPath = filepath.Join(workPath, "conf", runMode)
-
-	if curEnv, hasRunMode = os.LookupEnv(RunEnv); !hasRunMode {
-		fmt.Println(fmt.Sprintf("Can not find environment RunEnv. default: %v", TestMode))
-	}
-}
-
-func LoadJsonConfig(config interface{}, filename string) {
-	var err error
-	var decoder *json.Decoder
-
-	file := OpenFile(filename)
-	defer func() {
-		_ = file.Close()
-	}()
-
-	decoder = json.NewDecoder(file)
-	if err = decoder.Decode(config); err != nil {
-		msg := fmt.Sprintf("Decode json fail for config file at %s. Error: %v", filename, err)
-		panic(msg)
-	}
-}
-
-func LoadConfigFile(fileName string) *goconfig.ConfigFile {
-	if configFile, exist := appConfigMap[fileName]; exist {
-		return configFile
-	} else {
-		var err error
-		fullPath := filepath.Join(configPath, fileName)
-		configFile, err = goconfig.ReadConfigFile(fullPath)
-		appConfigMap[fileName] = configFile
-		if err != nil {
-			panic(err)
-		}
-		return configFile
-	}
+	configPath = filepath.Join(workPath, "config", runMode)
+	fmt.Println(fmt.Sprintf("current RUN_MODE : %v", runMode))
 }
 
 func LoadAppConfig() *goconfig.ConfigFile {
@@ -120,141 +72,8 @@ func LoadAppConfig() *goconfig.ConfigFile {
 	return configFile
 }
 
-func LoadNacosConfig() *app.NacosConfig {
-	if nacosConfig == nil {
-		var err error
-		file := OpenFile("nacos.yaml")
-		defer func() {
-			_ = file.Close()
-		}()
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			panic(err)
-		}
-		if err := yaml.Unmarshal(data, &nacosConfig); err != nil {
-			panic(err)
-		}
-	}
-	return nacosConfig
-}
-
-func LoadWXConfig() *app.WXConfig {
-	wxConfigOnce.Do(func() {
-		var err error
-		file := OpenFile("wx.yaml")
-		defer func() {
-			_ = file.Close()
-		}()
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			panic(err)
-		}
-		if err := yaml.Unmarshal(data, &wxConfig); err != nil {
-			panic(err)
-		}
-	})
-	return wxConfig
-}
-
-func LoadHeyTapConfig() *app.HeyTapConfig {
-	heyTapConfigOnce.Do(func() {
-		var err error
-		file := OpenFile("heytap.yaml")
-		defer func() {
-			_ = file.Close()
-		}()
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			panic(err)
-		}
-		if err := yaml.Unmarshal(data, &heyTapConfig); err != nil {
-			panic(err)
-		}
-	})
-	return heyTapConfig
-}
-
-func LoadRabbitMQConfig(config interface{}, filename string) {
-	var err error
-	file := OpenFile(filename)
-	defer func() {
-		_ = file.Close()
-	}()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-	if err := yaml.Unmarshal(data, config); err != nil {
-		panic(err)
-	}
-}
-
-func LoadKafkaConfig(config interface{}, filename string) {
-	var err error
-	var decoder *json.Decoder
-
-	file := OpenFile(filename)
-	defer func() {
-		_ = file.Close()
-	}()
-
-	decoder = json.NewDecoder(file)
-	if err = decoder.Decode(config); err != nil {
-		msg := fmt.Sprintf("Decode json fail for config file at %s. Error: %v", filename, err)
-		panic(msg)
-	}
-}
-
-func LoadRocketConfig(config interface{}, filename string) {
-	var err error
-	var decoder *json.Decoder
-
-	file := OpenFile(filename)
-	defer func() {
-		_ = file.Close()
-	}()
-
-	decoder = json.NewDecoder(file)
-	if err = decoder.Decode(config); err != nil {
-		msg := fmt.Sprintf("Decode json fail for config file at %s. Error: %v", filename, err)
-		panic(msg)
-	}
-}
-
 func IsDebugMode() bool {
 	return runMode != ReleaseMode
-}
-
-func IsAWSProduct() bool {
-	return curEnv == AWSProductEnv
-}
-
-func Channel() string {
-	return channel
-}
-
-func LoadJsonFile(filename string) (cfg string) {
-	file := OpenFile(filename)
-	defer func() {
-		_ = file.Close()
-	}()
-
-	content, err := ioutil.ReadAll(file)
-	if err != nil {
-		msg := fmt.Sprintf("Read config to string error. file at %s. Error: %v", filename, err)
-		panic(msg)
-	}
-
-	cfg = string(content)
-
-	if IsDebugMode() {
-		println(fmt.Sprintf("Load config at %s. Config content: %s", filename, cfg))
-	}
-	return cfg
-}
-
-func GetFullPath(filename string) string {
-	return filepath.Join(configPath, filename)
 }
 
 func OpenFile(filename string) *os.File {
@@ -269,40 +88,4 @@ func OpenFile(filename string) *os.File {
 	}
 
 	return file
-}
-
-func GetActorYaml() *app.IDs {
-	if actor == nil {
-		var err error
-		file := OpenFile("actor.yaml")
-		defer func() {
-			_ = file.Close()
-		}()
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			panic(err)
-		}
-		if err := yaml.Unmarshal(data, &actor); err != nil {
-			panic(err)
-		}
-	}
-	return actor
-}
-
-func GetSonglistIDYaml() *app.IDs {
-	if songlist == nil {
-		var err error
-		file := OpenFile("songlist.yaml")
-		defer func() {
-			_ = file.Close()
-		}()
-		data, err := ioutil.ReadAll(file)
-		if err != nil {
-			panic(err)
-		}
-		if err := yaml.Unmarshal(data, &songlist); err != nil {
-			panic(err)
-		}
-	}
-	return songlist
 }

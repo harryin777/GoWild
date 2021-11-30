@@ -8,7 +8,8 @@ package route
 
 import (
 	"GoWild/base"
-	"GoWild/route/nsq"
+	"GoWild/route/nsqRouter"
+	"GoWild/route/test"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -111,8 +112,9 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
-	//注册 nsq
-	nsq.Route(r)
+	//注册 nsqConsumer
+	nsqRouter.Route(r.Group(""))
+	test.Route(r.Group(""))
 
 	return r
 }

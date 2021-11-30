@@ -1,7 +1,12 @@
 package test
 
-import "github.com/gin-gonic/gin"
+import (
+	"GoWild/controller/test"
+	"github.com/gin-gonic/gin"
+)
 
-func HelloWorld(c *gin.Context) {
+func Route(group *gin.RouterGroup) {
+	g := group.Group("test")
 
+	g.GET("hello", test.Hello)
 }
