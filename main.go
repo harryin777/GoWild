@@ -7,14 +7,13 @@
 package main
 
 import (
-	"GoWild/common/ip"
 	"GoWild/consumer"
 	"GoWild/route"
 )
 
 func main() {
 	r := route.Route()
-	go ip.LocationInstances().ReadLocal()
+	//go ip.LocationInstances().ReadLocal()
 
 	consumer.StartAllConsumer()
 

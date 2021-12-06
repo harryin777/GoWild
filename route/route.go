@@ -71,13 +71,12 @@ func Route() *gin.Engine {
 	//shouldBindQuery 和 bindQuery
 	//注意 binding
 	type Person struct {
-		Name string `json:"name" form:"name"`
-		Age  int    `json:"age" form:"age"`
+		Name string `json:"name" form:"name" binding:"required"`
+		Age  int    `json:"age" form:"age" binding:"required"`
 	}
 	var p1 Person
-	r.POST("shouldBindQuery", func(context *gin.Context) {
-		// TODO 绑定不上去
-		err := context.ShouldBindQuery(&p1)
+	r.POST("shouldBindJSON", func(context *gin.Context) {
+		err := context.ShouldBindJSON(&p1)
 		if err == nil {
 			log.Println("==== shouldBindQuery ====")
 			log.Println(p1.Name)
@@ -88,9 +87,25 @@ func Route() *gin.Engine {
 		context.JSON(http.StatusOK, "ok")
 	})
 
+	r.POST("bindJson", func(context *gin.Context) {
+		if context.BindJSON(&p1) == nil {
+			log.Println("==== bindJson ====")
+			log.Println(p1.Name)
+			log.Println(p1.Age)
+		}
+		context.JSON(http.StatusOK, "ok")
+	})
+
+	type people struct {
+		Name string `form:"name"`
+		Age  int    `form:"age"`
+	}
+	var peo1 people
 	r.POST("bindQuery", func(context *gin.Context) {
-		if context.BindQuery(&p1) == nil {
-			log.Println("bind query")
+		if context.BindQuery(&peo1) == nil {
+			log.Println("==== bindQuery ====")
+			log.Println(peo1.Name)
+			log.Println(peo1.Age)
 		}
 		context.JSON(http.StatusOK, "ok")
 	})
