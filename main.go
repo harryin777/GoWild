@@ -18,4 +18,5 @@ func main() {
 	consumer.StartAllConsumer()
 
 	r.Run(":8080")
+
 }
